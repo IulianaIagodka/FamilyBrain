@@ -1,4 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { Platform } from 'react-native';
+import { flushSync } from 'react-dom';
 
 import { createId } from '@/lib/id';
 import { extractFromText, suggestionsFromExtraction } from '@/lib/extract';
@@ -17,6 +19,15 @@ import type {
   SuggestedResponsibility,
 } from '@/lib/types';
 
+function syncSetState(setState: React.Dispatch<React.SetStateAction<AppState>>, updater: (prev: AppState) => AppState) {
+  if (Platform.OS === 'web') {
+    flushSync(() => {
+      setState(updater);
+    });
+  } else {
+    setState(updater);
+  }
+}
 interface CreateHouseholdInput {
   yourName: string;
   partnerName: string;
@@ -108,7 +119,7 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
   }, [state, ready]);
 
   const update = useCallback((updater: (prev: AppState) => AppState) => {
-    setState((prev) => updater(prev));
+    syncSetState(setState, updater);
   }, []);
 
   const you = state.members.find((m) => m.role === 'you');
@@ -172,7 +183,7 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
           })),
       ];
 
-      setState({
+      syncSetState(setState, () => ({
         onboardingComplete: true,
         household: {
           id: createId('household'),
@@ -183,13 +194,13 @@ export function FamilyProvider({ children }: { children: React.ReactNode }) {
         responsibilities: [],
         inbox: [],
         viewingAs: 'you',
-      });
+      }));
     },
     [],
   );
 
   const skipWithDemo = useCallback(() => {
-    setState(buildDemoState('You', 'Alex'));
+    syncSetState(setState, () => buildDemoState('You', 'Alex'));
   }, []);
 
   const setViewingAs = useCallback((who: 'you' | 'partner') => {

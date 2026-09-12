@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radii, spacing, typography } from '@/constants/theme';
 import type { Ownership } from '@/lib/types';
@@ -51,6 +51,37 @@ export function OwnerChip({
   onPress?: () => void;
 }) {
   const style = OWNER_STYLES[owner];
+  const bg = selected ? style.bg : colors.surfaceMuted;
+  const border = selected ? style.fg : 'transparent';
+  const fg = selected ? style.fg : colors.textSecondary;
+
+  if (Platform.OS === 'web') {
+    return (
+      <button
+        type="button"
+        onClick={onPress}
+        style={{
+          borderRadius: 10,
+          paddingLeft: 12,
+          paddingRight: 12,
+          paddingTop: 10,
+          paddingBottom: 10,
+          marginRight: 8,
+          marginBottom: 8,
+          borderWidth: 1.5,
+          borderStyle: 'solid',
+          borderColor: border,
+          backgroundColor: bg,
+          color: fg,
+          fontFamily: 'DMSans_500Medium, \"DM Sans\", sans-serif',
+          fontSize: 14,
+          fontWeight: 500,
+          cursor: 'pointer',
+        }}>
+        {label}
+      </button>
+    );
+  }
 
   return (
     <Pressable
@@ -58,16 +89,15 @@ export function OwnerChip({
       style={[
         styles.chip,
         {
-          backgroundColor: selected ? style.bg : colors.surfaceMuted,
-          borderColor: selected ? style.fg : 'transparent',
+          backgroundColor: bg,
+          borderColor: border,
         },
       ]}>
-      <Text style={[styles.chipText, { color: selected ? style.fg : colors.textSecondary }]}>
-        {label}
-      </Text>
+      <Text style={[styles.chipText, { color: fg }]}>{label}</Text>
     </Pressable>
   );
 }
+
 
 const styles = StyleSheet.create({
   badge: {
