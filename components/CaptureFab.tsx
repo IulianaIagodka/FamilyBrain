@@ -38,7 +38,7 @@ export function CaptureFab() {
 const webFab: Record<string, string | number> = {
   position: 'fixed',
   right: 24,
-  bottom: 24,
+  bottom: 88,
   backgroundColor: colors.accent,
   borderRadius: 28,
   paddingTop: 14,
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: spacing.lg,
-    bottom: spacing.lg,
+    bottom: 88,
     backgroundColor: colors.accent,
     borderRadius: radii.xl,
     paddingVertical: 14,

@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CaptureFab } from '@/components/CaptureFab';
-import { Card, SectionLabel, Subtitle, Title } from '@/components/ui';
+import { Card, PrimaryButton, SectionLabel, Subtitle, Title } from '@/components/ui';
 import { colors, radii, spacing, typography } from '@/constants/theme';
 import { useFamily } from '@/lib/FamilyContext';
 
@@ -21,6 +21,10 @@ export default function InboxScreen() {
           <Subtitle>
             New information lands here first. Capture now — structure and ownership come next.
           </Subtitle>
+
+          <View style={{ marginTop: spacing.md }}>
+            <PrimaryButton label="Capture something" onPress={() => router.push('/capture')} />
+          </View>
 
           <SectionLabel>To review</SectionLabel>
           {items.length === 0 ? (
