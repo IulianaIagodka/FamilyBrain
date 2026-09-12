@@ -1,6 +1,71 @@
-import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { colors, radii, spacing, typography } from '@/constants/theme';
+
+type BtnProps = {
+  label: string;
+  onPress: () => void;
+  disabled?: boolean;
+  variant?: 'primary' | 'secondary' | 'ghost';
+};
+
+/**
+ * Web-friendly buttons. RN Web Pressable can miss clicks in some desktop
+ * automation / pointer setups, so web uses a real <button>.
+ */
+export function AppButton({ label, onPress, disabled, variant = 'primary' }: BtnProps) {
+  const variantStyle =
+    variant === 'primary' ? styles.primaryBtn : variant === 'secondary' ? styles.secondaryBtn : styles.ghostBtn;
+  const textStyle =
+    variant === 'primary'
+      ? styles.primaryBtnText
+      : variant === 'secondary'
+        ? styles.secondaryBtnText
+        : styles.ghostBtnText;
+
+  if (Platform.OS === 'web') {
+    return (
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={disabled ? undefined : onPress}
+        style={{
+          ...webBase,
+          ...(variant === 'primary'
+            ? webPrimary
+            : variant === 'secondary'
+              ? webSecondary
+              : webGhost),
+          opacity: disabled ? 0.45 : 1,
+          cursor: disabled ? 'not-allowed' : 'pointer',
+        }}>
+        {label}
+      </button>
+    );
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      disabled={disabled}
+      onPress={disabled ? undefined : onPress}
+      style={({ pressed }) => [variantStyle, disabled && styles.disabled, pressed && !disabled && styles.pressed]}>
+      <Text style={textStyle}>{label}</Text>
+    </Pressable>
+  );
+}
+
+export function PrimaryButton(props: Omit<BtnProps, 'variant'>) {
+  return <AppButton {...props} variant="primary" />;
+}
+
+export function SecondaryButton(props: Omit<BtnProps, 'variant' | 'disabled'>) {
+  return <AppButton {...props} variant="secondary" />;
+}
+
+export function GhostButton(props: Omit<BtnProps, 'variant' | 'disabled'>) {
+  return <AppButton {...props} variant="ghost" />;
+}
 
 export function Screen({
   children,
@@ -38,8 +103,25 @@ export function Card({
   onPress?: () => void;
 }) {
   if (onPress) {
+    if (Platform.OS === 'web') {
+      return (
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={onPress}
+          onKeyDown={(e: { key: string }) => {
+            if (e.key === 'Enter' || e.key === ' ') onPress();
+          }}
+          style={webCard}>
+          {children}
+        </div>
+      );
+    }
     return (
-      <Pressable onPress={onPress} style={({ pressed }) => [styles.card, style, pressed && styles.pressed]}>
+      <Pressable
+        accessibilityRole="button"
+        onPress={onPress}
+        style={({ pressed }) => [styles.card, style, pressed && styles.pressed]}>
         {children}
       </Pressable>
     );
@@ -47,56 +129,53 @@ export function Card({
   return <View style={[styles.card, style]}>{children}</View>;
 }
 
-export function PrimaryButton({
-  label,
-  onPress,
-  disabled,
-}: {
-  label: string;
-  onPress: () => void;
-  disabled?: boolean;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled}
-      style={({ pressed }) => [
-        styles.primaryBtn,
-        disabled && styles.disabled,
-        pressed && !disabled && styles.pressed,
-      ]}>
-      <Text style={styles.primaryBtnText}>{label}</Text>
-    </Pressable>
-  );
-}
+const webBase: Record<string, string | number> = {
+  width: '100%',
+  border: 'none',
+  borderRadius: 16,
+  paddingTop: 16,
+  paddingBottom: 16,
+  paddingLeft: 20,
+  paddingRight: 20,
+  fontFamily: 'DMSans_700Bold, \"DM Sans\", sans-serif',
+  fontSize: 16,
+  fontWeight: 700,
+};
 
-export function SecondaryButton({
-  label,
-  onPress,
-}: {
-  label: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.secondaryBtn, pressed && styles.pressed]}>
-      <Text style={styles.secondaryBtnText}>{label}</Text>
-    </Pressable>
-  );
-}
+const webPrimary: Record<string, string | number> = {
+  backgroundColor: colors.accent,
+  color: '#fff',
+};
 
-export function GhostButton({
-  label,
-  onPress,
-}: {
-  label: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.ghostBtn, pressed && styles.pressed]}>
-      <Text style={styles.ghostBtnText}>{label}</Text>
-    </Pressable>
-  );
-}
+const webSecondary: Record<string, string | number> = {
+  backgroundColor: colors.accentSoft,
+  color: colors.accentDeep,
+  fontFamily: 'DMSans_500Medium, \"DM Sans\", sans-serif',
+  fontWeight: 500,
+  fontSize: 15,
+  paddingTop: 14,
+  paddingBottom: 14,
+};
+
+const webGhost: Record<string, string | number> = {
+  backgroundColor: 'transparent',
+  color: colors.textSecondary,
+  fontFamily: 'DMSans_500Medium, \"DM Sans\", sans-serif',
+  fontWeight: 500,
+  fontSize: 15,
+  paddingTop: 12,
+  paddingBottom: 12,
+};
+
+const webCard: Record<string, string | number> = {
+  backgroundColor: colors.surface,
+  borderRadius: 22,
+  padding: 16,
+  borderWidth: 1,
+  borderStyle: 'solid',
+  borderColor: colors.borderSoft,
+  cursor: 'pointer',
+};
 
 const styles = StyleSheet.create({
   screen: {

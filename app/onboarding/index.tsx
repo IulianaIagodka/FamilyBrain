@@ -140,12 +140,12 @@ export default function OnboardingScreen() {
             </View>
           </ScrollView>
 
-          <View style={styles.footer}>
+            <View style={styles.footer}>
             {!isHousehold ? (
               <>
                 <PrimaryButton label="Continue" onPress={() => go(step + 1)} />
                 {step === 0 ? (
-                  <GhostButton label="Preview with sample family" onPress={skipWithDemo} />
+                  <SecondaryButton label="Preview with sample family" onPress={skipWithDemo} />
                 ) : (
                   <GhostButton label="Back" onPress={() => go(step - 1)} />
                 )}
